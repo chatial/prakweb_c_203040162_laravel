@@ -1,6 +1,13 @@
 <?php
 
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\RegisterController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Category;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\DashboardPostController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -14,18 +21,48 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('home');
+    return view('home', [
+        "title" => "Home",
+        'active' => 'categories'
+    ]);
 });
 
 Route::get('/about', function () {
     return view('about', [
+        "title" => "About",
         "name" => "Ahmad Reyhan Ronaldo",
-        "email" => "chatialfc@gmail.com",
-        "image" => "ahmad.png"
+        "email" => "ahmadreyhan.ronaldo@gmail.com",
+        "image" => "profile.png",
+        'active' => 'categories'
     ]);
 });
 
-Route::get('/blog', function () {
-    return view('posts');
+
+Route::get('/posts', [PostController::class, 'index']);
+
+// Halaman Single Post
+Route::get('posts/{post:slug}', [PostController::class, 'show']);
+
+Route::get('/categories', function () {
+    return view('categories', [
+       'title' => 'Post Categories',
+       'active' => 'categories',
+       'categories' =>Category::all()
+    ]);
 });
+
+Route::get('/login', [LoginController::class, 'index'])->name('login')->middleware('guest');
+Route::post('/login', [LoginController::class, 'authenticate']);
+Route::post('/logout', [LoginController::class, 'logout']);
+
+
+Route::get('/register', [RegisterController::class, 'index'])->middleware('guest');
+Route::post('/register', [RegisterController::class, 'store']);
+
+Route::get('/dashboard', function () {
+    return view('dashboard.index');
+})->middleware('auth');
+
+
+Route::resource('/dashboard/posts', DashboardPostController::class)->middleware('auth');
 
